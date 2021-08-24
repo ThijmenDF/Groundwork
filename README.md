@@ -1,5 +1,5 @@
-#Groundwork
-###A lightweight PHP framework
+# Groundwork
+### A lightweight PHP framework
 
 This is the core library for the Groundwork project.
 
