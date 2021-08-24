@@ -23,7 +23,7 @@
             "Groundwork\\": "src/Groundwork/"
         },
         "files": [
-            "Groundwork/Utils/helpers.php"
+            "src/Groundwork/Utils/helpers.php"
         ]
     },
     "authors": [
