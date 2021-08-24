@@ -32,6 +32,6 @@
             "email": "info@jurasoft.nl"
         }
     ],
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "license": "MIT"
 }
