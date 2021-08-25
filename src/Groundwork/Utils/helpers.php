@@ -1,13 +1,13 @@
 <?php
 
 use Groundwork\Database\Model;
+use Groundwork\Request\Request;
+use Groundwork\Response\Response;
 use Groundwork\Response\View;
 use Groundwork\Router\Router;
 use Groundwork\Utils\Table;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 /**
@@ -23,10 +23,10 @@ function root() : string
 
 /**
  * Returns a new instance of a View with the path and data objects.
- * 
+ *
  * @param string $path The path to the template file (optional extension)
  * @param array  $data The data to pass into the template engine
- * 
+ *
  * @return View
  */
 function view(string $path, array $data = []) : View
@@ -36,36 +36,35 @@ function view(string $path, array $data = []) : View
 
 /**
  * Returns a fresh HTTP request object
- * 
+ *
  * @return Request
  */
 function request() : Request
 {
-    return Request::createFromGlobals();
+    return Request::getInstance();
 }
 
 /**
  * Creates a new Response object
- * 
+ *
  * @param mixed $content The response data
  * @param int   $status  The response status code
- * @param array $headers An array of response headers
- * 
+ *
  * @return Response
  */
-function response(?string $content = '', int $status = 200, array $headers = []) : Response
+function response(?string $content = '', int $status = 200) : Response
 {
-    return new Response($content, $status, $headers);
+    return new Response($content, $status);
 }
 
 /**
  * Creates a new Json Response object which extends a Response object.
- * 
+ *
  * @param mixed $data    The response data
  * @param int   $status  The response status code
  * @param array $headers An array of response headers
  * @param bool  $json    If the data is already a JSON string
- * 
+ *
  * @return JsonResponse
  */
 function jsonResponse($data = null, int $status = 200, array $headers = [], bool $json = false) : JsonResponse
@@ -75,11 +74,11 @@ function jsonResponse($data = null, int $status = 200, array $headers = [], bool
 
 /**
  * Creates a new Redirection response object which extends a Response object.
- * 
+ *
  * @param string $url     The URL to redirect to
  * @param int    $status  The response status
  * @param array  $headers An array of response headers
- * 
+ *
  * @return RedirectResponse
  */
 function redirect(string $url, int $status = 302, array $headers = []) : RedirectResponse
@@ -89,7 +88,7 @@ function redirect(string $url, int $status = 302, array $headers = []) : Redirec
 
 /**
  * Starts a new session instance and returns it.
- * 
+ *
  * @return Session
  */
 function session() : Session
@@ -177,9 +176,9 @@ function clamp($value, $min, $max) {
 
 /**
  * Creates a new instance of a Table, if it isn't already.
- * 
+ *
  * @param mixed $data The data to put in the table. It may be a Table, array or otherwise.
- * 
+ *
  * @return Table
  */
 function table($data = []) : Table
@@ -187,7 +186,7 @@ function table($data = []) : Table
     if ($data instanceof Table) {
         return $data;
     }
-    
+
     if (!is_array($data)) {
         $data = [$data];
     }
@@ -201,36 +200,37 @@ function table($data = []) : Table
  * @param string      $name
  * @param string|null $default
  *
- * @return mixed|null
+ * @return string|null
  */
-function old(string $name, string $default = null)
+function old(string $name, string $default = null) : ?string
 {
-    $old = session()->get('validation-old');
-    if (is_null($old)) {
-        return $default;
-    }
-
-    $path = request()->getRequestUri();
-
-    return $old[$path][$name] ?? $default;
+    return request()->old($name, $default);
 }
 
 /**
- * Returns whether a given name failed to validate, and the description of the failure.
+ * Returns whether a given name is known as an error.
  *
  * @param string $name
  *
- * @return false|string
+ * @return bool
  */
-function invalid(string $name)
+function hasError(string $name) : bool
 {
-    $failed = session()->get('validation-failed');
-    if (is_null($failed)) {
-        return false;
-    }
+    $failed = request()->getFlashItem('errors');
 
-    $path = request()->getRequestUri();
-
-    return $failed[$path][$name] ?? false;
+    return $failed[$name] ?? false;
 }
 
+/**
+ * Returns the text content of a given error name, and clears it from the flash session.
+ *
+ * @param string $name
+ *
+ * @return string|null
+ */
+function getError(string $name) : ?string
+{
+    $errors = request()->getFlashItem('errors');
+
+    return $errors[$name] ?? null;
+}

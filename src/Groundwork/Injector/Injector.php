@@ -75,8 +75,8 @@ class Injector
 
             // If the key also exists in the parameter list...
             if ($params->has($key)) {
-                if ($definition->getType()->isBuiltin()) {
-                    // a built-in type is automatically cast.
+                if ($definition->getType()->isBuiltin() || is_null($class)) {
+                    // a built-in type is automatically cast, and if there's no class, just set it directly too.
                     $returned->set($key, $params->get($key));
                 }
                 elseif ($class->implementsInterface(Injection::class)) {
@@ -84,7 +84,7 @@ class Injector
                     $returned->set($key, call_user_func($class->getName() . '::__inject', $params->get($key)));
                 }
                 else {
-                    // default action: new instance of the class with the key given as its first and only parameter.
+                    // otherwise, make a new instance of the class with the key given as its first and only parameter.
                     $name = $class->getName();
                     $returned->set($key, new $name($params->get($key)));
                 }
@@ -92,7 +92,7 @@ class Injector
             }
 
             // The key isn't given.
-            if ($class->implementsInterface(Injection::class)) {
+            if (!is_null($class) && $class->implementsInterface(Injection::class)) {
                 $returned->set($key, call_user_func($class->getName() . '::__inject', null));
             }
             else {

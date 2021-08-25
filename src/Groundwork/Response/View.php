@@ -43,7 +43,8 @@ class View {
         ]);
 
         $this->twig->addFunction(new TwigFunction('old', fn(string $name, string $default = null)  => old($name, $default)));
-        $this->twig->addFunction(new TwigFunction('invalid', fn(string $name)  => invalid($name)));
+        $this->twig->addFunction(new TwigFunction('hasError', fn(string $name)  => hasError($name)));
+        $this->twig->addFunction(new TwigFunction('getError', fn(string $name)  => getError($name)));
 
         if (!Str::endsWith($path, '.html.twig')) {
             $path .= '.html.twig';

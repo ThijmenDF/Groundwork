@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection SqlResolve */
 
 namespace Groundwork\Database;
 

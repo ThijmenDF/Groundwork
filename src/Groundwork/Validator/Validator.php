@@ -4,8 +4,8 @@ namespace Groundwork\Validator;
 
 use Groundwork\Exceptions\ValidationFailedException;
 use Groundwork\Injector\Injection;
+use Groundwork\Request\Request;
 use Groundwork\Utils\Table;
-use Symfony\Component\HttpFoundation\Request;
 
 class Validator implements Injection
 {
@@ -47,12 +47,12 @@ class Validator implements Injection
 
         $rules->every(function($rules, $key) use(&$old, &$ok) {
 
-            $item = $this->request->get($key);
+            $item = $this->request->input($key);
 
             $old[$key] = $item;
 
-            if (is_null($item)) {
-                $item = $this->request->files->get($key);
+            if (is_null($item) && $this->request->hasFile($key)) {
+                $item = $this->request->file($key);
             }
 
             $asserter = new Asserter($rules);
@@ -68,8 +68,7 @@ class Validator implements Injection
         });
 
         $this->updateSession(
-            table($this->failed())->transform(fn(AssertFailedException $item) => $item->getMessage())->all(),
-            $old
+            table($this->failed())->transform(fn(AssertFailedException $item) => $item->getMessage())->all()
         );
 
         $this->processed = $ok;
@@ -122,24 +121,12 @@ class Validator implements Injection
         return $instance;
     }
 
-    private function updateSession(array $failures, array $old)
+    private function updateSession(array $failures)
     {
-        // create / load
-        $session = session();
-
-        $path = $this->request->getRequestUri();
-
         // set failures
-        $oldFailures = $session->get('validation-failed', []);
-        $oldFailures[$path] = $failures;
-        $session->set('validation-failed', $oldFailures);
+        $this->request->session()->getFlashBag()->set('errors', $failures);
 
         // set previous values
-        $oldOld = $session->get('validation-old', []);
-        $oldOld[$path] = $old;
-        $session->set('validation-old', $oldOld);
-
-        // save
-        $session->save();
+        $this->request->flash();
     }
 }

@@ -11,10 +11,10 @@ use Groundwork\Exceptions\Http\HttpException;
 use Groundwork\Exceptions\Http\InternalServerErrorException;
 use Groundwork\Exceptions\ValidationFailedException;
 use Groundwork\Injector\Injector;
+use Groundwork\Response\Response;
 use Groundwork\Response\View;
 use Groundwork\Router\Router;
 use Groundwork\Traits\Singleton;
-use Symfony\Component\HttpFoundation\Response;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
@@ -111,10 +111,17 @@ class Server {
                 break;
             case $result instanceof Response:
                 // Submit the result with the use of the Response Class
+                if (!is_null($code)) {
+                    $result->code($code);
+                }
+
                 $result
-                    ->setStatusCode($code ?? $result->getStatusCode())
-                    ->prepare(request())
+                    ->get()
+                    ->prepare(request()->getRequest())
                     ->send();
+
+                // clear the flash session for any residue.
+                request()->session()->getFlashBag()->clear();
 
                 break;
             case $result instanceof PaginatedResult:
@@ -130,7 +137,7 @@ class Server {
             case $result instanceof ValidationFailedException:
 
                 $this->processResult(redirect(
-                    request()->getRequestUri()
+                    request()->url()
                 ));
 
                 break;
