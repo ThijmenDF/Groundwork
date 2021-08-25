@@ -2,6 +2,7 @@
 
 namespace Groundwork\Response;
 
+use Groundwork\Config\Config;
 use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
@@ -38,8 +39,9 @@ class View {
         ]);
 
         $this->twig = new Environment($loader, [
-            'cache' => false,
+            'cache' => Config::get('VIEW_CACHE', true) ? root() . '/cache/twig' : false,
             'strict_variables' => false,
+            'debug' => Config::get('VIEW_DEBUG', Config::isDev())
         ]);
 
         $this->twig->addFunction(new TwigFunction('old', fn(string $name, string $default = null)  => old($name, $default)));

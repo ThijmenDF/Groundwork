@@ -37,6 +37,12 @@ abstract class Config {
             ->notEmpty();
 
         $dotenv->required('DB_PASS');
+
+        $dotenv->ifPresent('VIEW_CACHE')
+            ->isBoolean();
+
+        $dotenv->ifPresent('DEBUG_CACHE')
+            ->isBoolean();
     }
 
     /**
