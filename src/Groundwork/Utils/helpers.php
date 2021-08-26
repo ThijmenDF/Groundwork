@@ -106,7 +106,7 @@ function reload(int $status = 302, array $headers = []) : RedirectResponse
  */
 function back() : RedirectResponse
 {
-    return redirect(request()->referer(), request()->url());
+    return redirect(request()->referer() ?? request()->url());
 }
 
 /**

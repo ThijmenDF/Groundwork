@@ -2,13 +2,16 @@
 # Groundwork
 ### A lightweight PHP framework
 
-This is the core library for the Groundwork project.
+# Note: Groundwork is still in its alpha state and will undergo heavy changes before a more stable release structure is implemented.
+
+This is the core library for the Groundwork project. See [the default Groundwork project](https://github.com/ThijmenDF/groundwork-project) for more information.
 
 The framework uses various external packages such as, but not limited to:
 * [Twig](https://packagist.org/packages/twig/twig) for rendering templates.
 * [Symfony](https://packagist.org/packages/symfony/http-foundation) for HTTP request / response processing.
 * [Carbon](https://packagist.org/packages/nesbot/carbon) for date / time.
 * [Altorouter](https://packagist.org/packages/altorouter/altorouter) for routes.
+* [TailwindCSS](https://tailwindcss.com/) for styling. You'll have to install it with npm. (see package.json in the default project)
 
 ### Installing
 To install, run `composer require thijmendf/groundwork`
@@ -32,11 +35,6 @@ $server->handle();
 ```
 
 And that's it. It'll automatically handle the requests and responses.
-
-### Extending
-You can also extend certain features by making a class in the /App/Extensions namespace. Extensions **must** implement the `Groundwork/Extensions/Extension` interface.  
-Currently, only the View / Rendering can be extended (for instance to add twig functions). This can be done by making a `App/Extensions/Renderer` class.
-
 
 ### Default file structure
 
@@ -72,4 +70,11 @@ A project that implements this framework needs the following file structure:
 |---- .env <- Configuration file. see .env.example
 ```
 
-See [the default Groundwork project](https://github.com/ThijmenDF/groundwork-project) for more information.
+### Extending
+You can also extend certain features by making a class in the `/App/Extensions` namespace. Extensions **must** implement the `Groundwork/Extensions/Extension` interface.
+
+The following components can be extended:
+* `App/Extensions/Renderer` For adding twig functions, filters etc.
+* More coming soon.
+
+See [the default Groundwork project](https://github.com/ThijmenDF/groundwork-project) for an example of how this framework can be set up.
