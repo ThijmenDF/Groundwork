@@ -108,10 +108,12 @@ class Request implements Injection
      *
      * @param string $name
      * @param null   $default
+     *
+     * @return string|null
      */
-    public function header(string $name, $default = null)
+    public function header(string $name, $default = null) : ?string
     {
-        $this->request->headers->get($name, $default);
+        return $this->request->headers->get($name, $default);
     }
 
     /**
@@ -319,5 +321,14 @@ class Request implements Injection
         return $this->getFlashItem('old')[$name] ?? $default;
     }
 
+    /**
+     * Attempts to get the url of the referer header, if it exists.
+     *
+     * @return string|null
+     */
+    public function referer() : ?string
+    {
+        return $this->header('referer');
+    }
 
 }

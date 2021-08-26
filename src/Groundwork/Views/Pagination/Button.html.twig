@@ -1,0 +1,12 @@
+{% if data.disabled %}
+    <span class="button">
+        {{ data.content }}
+    </span>
+{% else %}
+    <a href="{{ data.url }}"  class="button" >
+        {{ data.content }}
+    </a>
+{% endif %}
+
+
+

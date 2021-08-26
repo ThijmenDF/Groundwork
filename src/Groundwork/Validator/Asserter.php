@@ -2,6 +2,7 @@
 
 namespace Groundwork\Validator;
 
+use Groundwork\Exceptions\AssertFailedException;
 use Groundwork\Utils\Str;
 
 class Asserter 

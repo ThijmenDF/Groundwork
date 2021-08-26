@@ -2,6 +2,7 @@
 
 namespace Groundwork\Validator;
 
+use Groundwork\Exceptions\AssertFailedException;
 use Groundwork\Exceptions\ValidationFailedException;
 use Groundwork\Injector\Injection;
 use Groundwork\Request\Request;

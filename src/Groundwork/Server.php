@@ -15,6 +15,7 @@ use Groundwork\Response\Response;
 use Groundwork\Response\View;
 use Groundwork\Router\Router;
 use Groundwork\Traits\Singleton;
+use Groundwork\Twig\Engine;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
@@ -58,31 +59,25 @@ class Server {
         try {
             $match = $this->router->matchRoutes();
 
-            $reflector = new Injector($match[0]);
-
-            try {
-                $result = $reflector->provide($match[1], $match[2]);
-            } catch (ValidationFailedException $exception) {
-                $result = $exception;
-            }
+            $result = $match->call();
         }
         catch (HttpException $ex) {
             $result = $ex;
-            error_log($ex->__toString());
+            error_log((string) $ex);
         } 
         catch (Exception $ex) {
-            if (!Config::isProd()) {
+            if (Config::isDev()) {
                 throw $ex;
             }
             $result = new InternalServerErrorException($ex->getMessage());
-            error_log($ex->__toString());
+            error_log((string) $ex);
         } 
-        catch (Error $error) {
-            if (!Config::isProd()) {
-                throw $error;
+        catch (Error $ex) {
+            if (Config::isDev()) {
+                throw $ex;
             }
-            $result = new InternalServerErrorException($error->getMessage());
-            error_log($error->__toString());
+            $result = new InternalServerErrorException($ex->getMessage());
+            error_log((string) $ex);
         }
 
         $this->processResult($result);
@@ -103,11 +98,12 @@ class Server {
         switch (true) {
             case $result instanceof View:
                 // Parse the View and re-run this method with the content as a response
+                $engine = Engine::getInstance();
 
-                $content = $result->handle();
-
-                $this->processResult(response($content), $code);
-
+                $this->processResult(
+                    response($engine->render($result)),
+                    $code
+                );
                 break;
             case $result instanceof Response:
                 // Submit the result with the use of the Response Class
@@ -136,9 +132,7 @@ class Server {
                 break;
             case $result instanceof ValidationFailedException:
 
-                $this->processResult(redirect(
-                    request()->url()
-                ));
+                $this->processResult(reload());
 
                 break;
             case is_string($result):

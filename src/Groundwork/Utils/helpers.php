@@ -87,6 +87,29 @@ function redirect(string $url, int $status = 302, array $headers = []) : Redirec
 }
 
 /**
+ * Creates a new Redirection response object which redirects to the current page.
+ *
+ * @param int   $status  The response status
+ * @param array $headers An array of response headers
+ *
+ * @return RedirectResponse
+ */
+function reload(int $status = 302, array $headers = []) : RedirectResponse
+{
+    return redirect(request()->url(), $status, $headers);
+}
+
+/**
+ * Creates a new Redirection response object which attempts to send the user back to their previous location.
+ *
+ * @return RedirectResponse
+ */
+function back() : RedirectResponse
+{
+    return redirect(request()->referer(), request()->url());
+}
+
+/**
  * Starts a new session instance and returns it.
  *
  * @return Session
@@ -110,9 +133,8 @@ function route(string $name, $data = []) : string
     // Fetch the server instance which has the routes mapped.
     $router = Router::getInstance();
 
-    if ($data instanceof Model) {
-        // Extract the models identifier
-        $data = ['id' => $data->getIdentifier()];
+    if (!is_array($data)) {
+        $data = ['id' => $data];
     }
 
     // Generate the URL and return it.

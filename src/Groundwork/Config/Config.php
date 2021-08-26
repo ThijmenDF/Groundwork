@@ -7,6 +7,9 @@ use Dotenv\Exception\ValidationException;
 
 abstract class Config {
 
+    /**
+     * @fixme: this is really slow! typically 250-400ms!
+     */
     public static function load()
     {
         $dotenv = Dotenv::createImmutable(root());
@@ -38,10 +41,7 @@ abstract class Config {
 
         $dotenv->required('DB_PASS');
 
-        $dotenv->ifPresent('VIEW_CACHE')
-            ->isBoolean();
-
-        $dotenv->ifPresent('DEBUG_CACHE')
+        $dotenv->ifPresent(['VIEW_CACHE', 'DEBUG_CACHE'])
             ->isBoolean();
     }
 

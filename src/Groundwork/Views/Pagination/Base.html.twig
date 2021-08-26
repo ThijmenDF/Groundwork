@@ -1,0 +1,5 @@
+<div class="pagination-links">
+    {% for i in pages %}
+        {{ include('Groundwork/Pagination/Button.html.twig', {data: i}) }}
+    {% endfor %}
+</div>
