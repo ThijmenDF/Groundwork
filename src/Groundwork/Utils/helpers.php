@@ -2,12 +2,12 @@
 
 use Groundwork\Database\Model;
 use Groundwork\Request\Request;
+use Groundwork\Response\RedirectResponse;
 use Groundwork\Response\Response;
 use Groundwork\Response\View;
 use Groundwork\Router\Router;
 use Groundwork\Utils\Table;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 /**
@@ -83,7 +83,7 @@ function jsonResponse($data = null, int $status = 200, array $headers = [], bool
  */
 function redirect(string $url, int $status = 302, array $headers = []) : RedirectResponse
 {
-    return new RedirectResponse($url, $status, $headers);
+    return (new RedirectResponse($url, $status))->withHeaders($headers);
 }
 
 /**

@@ -64,7 +64,11 @@ class Server {
         catch (HttpException $ex) {
             $result = $ex;
             error_log((string) $ex);
-        } 
+        }
+        catch (ValidationFailedException $ex) {
+            // This is thrown if the dependency injection ran a Validator which returned on failure
+            $result = back();
+        }
         catch (Exception $ex) {
             if (Config::isDev()) {
                 throw $ex;
@@ -128,11 +132,6 @@ class Server {
             case $result instanceof HttpException:
                 // Prepare the View for this exception if the error handler didn't catch it.
                 $this->processResult($result->toView(), $code ?? $result->getCode() ?? 500);
-
-                break;
-            case $result instanceof ValidationFailedException:
-
-                $this->processResult(reload());
 
                 break;
             case is_string($result):

@@ -2,7 +2,6 @@
 
 namespace Groundwork\Response;
 
-use Groundwork\Database\Model;
 use Groundwork\Utils\Table;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
