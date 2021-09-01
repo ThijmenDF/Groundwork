@@ -7,8 +7,8 @@
         "php": "^7.4|^8.0",
         "ext-mysqli": "*",
         "ext-json": "*",
+        "ext-fileinfo": "*",
         "altorouter/altorouter": "^2.0",
-        "filp/whoops": "^2.14",
         "gladcodes/keygen": "^1.1",
         "intervention/image": "^2.6",
         "nesbot/carbon": "^2.50",
@@ -17,6 +17,9 @@
         "symfony/var-dumper": "^5.3",
         "twig/twig": "^3.3",
         "vlucas/phpdotenv": "^5.3"
+    },
+    "require-dev": {
+        "filp/whoops": "^2.14"
     },
     "autoload": {
         "psr-4": {

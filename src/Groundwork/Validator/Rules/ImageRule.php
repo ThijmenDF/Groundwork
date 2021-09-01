@@ -2,6 +2,7 @@
 
 namespace Groundwork\Validator\Rules;
 
+use Groundwork\Request\FileUpload;
 use Groundwork\Validator\Rule;
 
 class ImageRule extends Rule
@@ -9,17 +10,15 @@ class ImageRule extends Rule
     protected array $types = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'svg', 'webp'];
 
     /**
-     * Passes if the given input is a valid uploaded file.
+     * Passes if the given input is a valid image.
      */
     public function passes($value, array $params = []): bool
     {
-        if(empty($value) || !isset($value['name'], $value['type'], $value['size'])) {
+        if (!($value instanceof FileUpload) || $value->hasError()) {
             return false;
         }
 
-        $imageFileType = strtolower(pathinfo($value['name'], PATHINFO_EXTENSION));
-
-        if (getimagesize($value['tmp_name']) && in_array($imageFileType, $this->types)) {
+        if (getimagesize($value->tmpName()) && in_array(strtolower($value->ext()), $this->types)) {
             return true;
         }
 

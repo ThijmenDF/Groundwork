@@ -2,7 +2,6 @@
 
 namespace Groundwork\Response;
 
-use Groundwork\Utils\Table;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class Response
@@ -15,6 +14,7 @@ class Response
 
     /**
      * @param mixed $content
+     * @param int $code
      */
     public function __construct($content, int $code = 200)
     {
@@ -142,10 +142,6 @@ class Response
                 return '';
             case is_string($this->content):
                 return $this->content;
-//            case $this->content instanceof Model:
-//                return $this->content->toJson();
-            case $this->content instanceof Table:
-                return json_encode($this->content->all());
             default:
                 return (string) $this->content;
         }

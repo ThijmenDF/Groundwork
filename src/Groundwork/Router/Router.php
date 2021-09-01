@@ -85,7 +85,7 @@ class Router {
     public function matchRoutes() : Match
     {
         // Match the routes
-        $match = $this->router->match();
+        $match = $this->router->match(null, request()->method());
 
         // A route was matched
         if ($match) {

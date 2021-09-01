@@ -11,16 +11,72 @@ use Groundwork\Utils\Table;
 class Validator implements Injection
 {
 
+    /**
+     * An associative array of testing rules.
+     *
+     * The following format can be used:
+     * ```
+     * public array $rules = [
+     *     'username' => [
+     *         'required',
+     *         'length:5'
+     *     ],
+     *     'file' => [
+     *         'required',
+     *         'image'
+     *     ],
+     *     'new-password' => [
+     *         'nullable',
+     *         'min:6'
+     *     ]
+     *     'email' => [
+     *         'required',
+     *         'email'
+     *     ]
+     * ];
+     * ```
+     * Note that some rules have (optional) parameters. These parameters can be seperated by using a column `:`.
+     *
+     * Some rules will stop the check of consequent rules if the value passes a certain check. An example is 'nullable',
+     * which will stop any remaining rules from being applied to the value if the value is null.
+     *
+     * @var array
+     */
     public array $rules = [];
 
+    /**
+     * Whether this validator needs to return to the previous route if any validation rules failed.
+     *
+     * @var bool
+     */
     public bool $returnOnFailure = false;
 
+    /**
+     * An associative array of AssertFailedExceptions.
+     *
+     * @var array
+     */
     protected array $failures = [];
 
+    /**
+     * An associative array of all input fields that passed their validation rules.
+     *
+     * @var array
+     */
     protected array $validated = [];
 
+    /**
+     * The request object.
+     *
+     * @var Request
+     */
     protected Request $request;
 
+    /**
+     * If the rules have been processed and the result of it.
+     *
+     * @var bool|null
+     */
     protected ?bool $processed = null;
 
     /**
@@ -43,14 +99,11 @@ class Validator implements Injection
         }
 
         $rules = table($this->rules);
-        $old = [];
         $ok = true;
 
-        $rules->every(function($rules, $key) use(&$old, &$ok) {
+        $rules->every(function($rules, $key) use(&$ok) {
 
             $item = $this->request->input($key);
-
-            $old[$key] = $item;
 
             if (is_null($item) && $this->request->hasFile($key)) {
                 $item = $this->request->file($key);
@@ -114,7 +167,7 @@ class Validator implements Injection
 
         $ok = $instance->validate();
 
-        if ($instance->returnOnFailure && !$ok) {
+        if (!$ok && $instance->returnOnFailure) {
             // return to the previous screen
             throw new ValidationFailedException;
         }
@@ -122,6 +175,11 @@ class Validator implements Injection
         return $instance;
     }
 
+    /**
+     * Adds the failures and old values to the flash session.
+     *
+     * @param array $failures
+     */
     private function updateSession(array $failures)
     {
         // set failures

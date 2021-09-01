@@ -2,19 +2,21 @@
 
 namespace Groundwork\Validator\Rules;
 
+use Groundwork\Request\FileUpload;
 use Groundwork\Validator\Rule;
 
 class FileRule extends Rule
 {
     /**
-     * Passes if the given input is a valid uploaded file.
+     * Passes if the given input is a validly uploaded file.
      */
     public function passes($value, array $params = []): bool
     {
-        return !empty($value) && 
-               isset($value['name'], $value['type'], $value['size']) && 
-               $value['size'] > 0 &&
-               $value['error'] == 0;
+        if (!($value instanceof FileUpload)) {
+            return false;
+        }
+
+        return !$value->hasError();
     }
 
     public function getErrorMessage($value, array $params = []) : string

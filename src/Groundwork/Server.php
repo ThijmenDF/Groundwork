@@ -10,7 +10,6 @@ use Groundwork\Database\Pagination\PaginatedResult;
 use Groundwork\Exceptions\Http\HttpException;
 use Groundwork\Exceptions\Http\InternalServerErrorException;
 use Groundwork\Exceptions\ValidationFailedException;
-use Groundwork\Injector\Injector;
 use Groundwork\Response\Response;
 use Groundwork\Response\View;
 use Groundwork\Router\Router;
@@ -19,10 +18,6 @@ use Groundwork\Twig\Engine;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
-use Whoops\Handler\JsonResponseHandler;
-use Whoops\Handler\PrettyPageHandler;
-use Whoops\Run;
-use Whoops\Util\Misc;
 
 class Server {
 
@@ -120,9 +115,6 @@ class Server {
                     ->prepare(request()->getRequest())
                     ->send();
 
-                // clear the flash session for any residue.
-                request()->session()->getFlashBag()->clear();
-
                 break;
             case $result instanceof PaginatedResult:
                 // create a json response
@@ -149,15 +141,13 @@ class Server {
      */
     private function setupWhoops() : void
     {
-        $run = new Run;
-        $handler = new PrettyPageHandler;
+        $run = new \Whoops\Run;
+        $handler = new \Whoops\Handler\PrettyPageHandler;
 
-        $handler->setPageTitle("Whoops! You made a mistake");
+        $run->appendHandler($handler);
 
-        $run->pushHandler($handler);
-
-        if (Misc::isAjaxRequest()) {
-            $run->pushHandler(new JsonResponseHandler);
+        if (request()->isAjaxRequest()) {
+            $run->prependHandler(new \Whoops\Handler\JsonResponseHandler);
         }
 
         $run->register();

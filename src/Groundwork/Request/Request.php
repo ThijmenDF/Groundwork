@@ -4,6 +4,7 @@ namespace Groundwork\Request;
 
 use Groundwork\Injector\Injection;
 use Groundwork\Traits\Singleton;
+use Groundwork\Utils\Table;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpFoundation\Session\Session;
 
@@ -17,9 +18,13 @@ class Request implements Injection
 
     protected array $flashed = [];
 
+    protected Table $files;
+
     protected function __construct()
     {
         $this->request = SymfonyRequest::createFromGlobals();
+
+        $this->files = FileUpload::createFromGlobal();
     }
 
     public static function __inject($param) : self
@@ -227,19 +232,19 @@ class Request implements Injection
     }
 
     /**
-     * Attempts to get a File input by key name.
+     * Attempts to get the first File input by key name.
      *
      * @param string $name
      *
-     * @return mixed
+     * @return FileUpload|null
      */
-    public function file(string $name)
+    public function file(string $name) : ?FileUpload
     {
-        return $this->request->files->get($name);
+        return $this->files->first(fn(FileUpload $upload) => $upload->inputName() === $name);
     }
 
     /**
-     * Returns whether a given file is present.
+     * Returns whether a given file is present based on their input key name.
      *
      * @param string $name
      *
@@ -247,13 +252,23 @@ class Request implements Injection
      */
     public function hasFile(string $name) : bool
     {
-        return $this->request->files->has($name);
+        return $this->files->contains(fn(FileUpload $upload) => $upload->inputName() === $name);
+    }
+
+    /**
+     * Retrieves a table of all FileUpload instances.
+     *
+     * @return Table
+     */
+    public function files() : Table
+    {
+        return $this->files;
     }
 
     /**
      * Gets the value from a cookie.
      *
-     * Hmm! Cookies! /s
+     * Hmm! Cookies! Me LIKE Cookies!! /s
      *
      * @param string $name
      *
@@ -329,6 +344,16 @@ class Request implements Injection
     public function referer() : ?string
     {
         return $this->header('referer');
+    }
+
+    /**
+     * Returns whether the request was made using some kind of tool (X-Requested-With must be set).
+     *
+     * @return bool
+     */
+    public function isAjaxRequest() : bool
+    {
+        return !is_null($this->header('X-Requested-With'));
     }
 
 }

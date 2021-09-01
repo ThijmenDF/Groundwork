@@ -27,7 +27,6 @@ class Engine
      */
     protected function init()
     {
-
         $loader = new FilesystemLoader([
             root() . 'resources/views', // Load from resources first to make views overridable (such as the pagination view)
             __DIR__ . '/../Views' // src/Groundwork/Twig/../Views
