@@ -7,6 +7,7 @@ use Error;
 use Exception;
 use Groundwork\Config\Config;
 use Groundwork\Database\Pagination\PaginatedResult;
+use Groundwork\Exceptions\EnvConfigurationException;
 use Groundwork\Exceptions\Http\HttpException;
 use Groundwork\Exceptions\Http\InternalServerErrorException;
 use Groundwork\Exceptions\ValidationFailedException;
@@ -29,8 +30,8 @@ class Server {
     private function __construct()
     {
         try {
-            Config::load();
-        } catch (ValidationException $exception) {
+            new Config();
+        } catch (EnvConfigurationException $exception) {
             $this->processResult(new InternalServerErrorException('Incorrect environment configuration! - ' . $exception->getMessage()));
             exit;
         }

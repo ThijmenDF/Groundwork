@@ -75,6 +75,7 @@ You can also extend certain features by making a class in the `/App/Extensions` 
 
 The following components can be extended:
 * `App/Extensions/Renderer` For adding twig functions, filters etc.
+* `App/Extensions/Config` For verifying .env configuration. New items can be verified by using Config::required() or Config::optional().
 * More coming soon.
 
 See [the default Groundwork project](https://github.com/ThijmenDF/groundwork-project) for an example of how this framework can be set up.

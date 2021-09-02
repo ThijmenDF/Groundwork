@@ -2,47 +2,56 @@
 
 namespace Groundwork\Config;
 
-use Dotenv\Dotenv;
-use Dotenv\Exception\ValidationException;
+use Groundwork\Exceptions\EnvConfigurationException;
+use Groundwork\Extensions\ExtensionHandler;
+use Symfony\Component\Dotenv\Dotenv;
 
-abstract class Config {
+class Config {
 
     /**
-     * @fixme: this is really slow! typically 250-400ms!
+     * By creating a new instance, the .env file will be loaded and the 'Config' extension will be run.
+     *
+     * @throws EnvConfigurationException
      */
-    public static function load()
+    public function __construct()
     {
-        $dotenv = Dotenv::createImmutable(root());
-        $dotenv->load();
+        $dotenv = new Dotenv();
+        $dotenv->load(root() . '.env');
 
-        static::checkRequired($dotenv);
+        $this->checkVendorSettings();
+
+        ExtensionHandler::loadExtension('Config', $this);
     }
 
     /**
-     * Makes sure all required .env keys are present.
-     * 
-     * @param Dotenv $dotenv
-     * @throws ValidationException
+     * Makes sure all required .env keys are present for the vendor.
+     *
+     * @throws EnvConfigurationException
      */
-    protected static function checkRequired(Dotenv $dotenv)
+    protected function checkVendorSettings()
     {
-        $dotenv->required('APP_ENV')
-            ->notEmpty()
-            ->allowedValues(['prod', 'dev', 'test']);
+        static::required('APP_ENV')
+            ->in(['prod', 'test', 'dev']);
 
-        $dotenv->ifPresent(['DB_HOST', 'DB_USER'])
+        static::optional('DB_HOST')
             ->notEmpty();
 
-        $dotenv->ifPresent('DB_PORT')
-            ->isInteger();
-
-        $dotenv->required('DB_NAME')
+        static::optional('DB_USER')
             ->notEmpty();
 
-        $dotenv->required('DB_PASS');
+        static::required('DB_NAME')
+            ->notEmpty();
 
-        $dotenv->ifPresent(['VIEW_CACHE', 'DEBUG_CACHE'])
-            ->isBoolean();
+        static::optional('DB_PORT')
+            ->integer();
+
+        static::required('DB_PASS');
+
+        static::optional('VIEW_CACHE')
+            ->boolean();
+
+        static::optional('DEBUG_CACHE')
+            ->boolean();
     }
 
     /**
@@ -55,6 +64,43 @@ abstract class Config {
      */
     public static function get(string $name, $default = null) {
         return $_ENV[$name] ?? $default;
+    }
+
+    /**
+     * Returns whether a given value exists in the .env file.
+     *
+     * @param string $name
+     *
+     * @return bool
+     */
+    public static function has(string $name) : bool
+    {
+        return isset($_ENV[$name]);
+    }
+
+    /**
+     * Creates a new validator and makes sure the key exists.
+     *
+     * @param string $name
+     *
+     * @return EnvValidator
+     * @throws EnvConfigurationException
+     */
+    public static function required(string $name) : EnvValidator
+    {
+        return (new EnvValidator($name))->required();
+    }
+
+    /**
+     * Creates a new validator and makes it optional.
+     *
+     * @param string $name
+     *
+     * @return EnvValidator
+     */
+    public static function optional(string $name) : EnvValidator
+    {
+        return (new EnvValidator($name))->optional();
     }
 
     /**
