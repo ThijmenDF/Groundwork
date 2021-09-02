@@ -47,6 +47,9 @@ class Config {
 
         static::required('DB_PASS');
 
+        static::required('ENABLE_MIGRATOR')
+            ->boolean();
+
         static::optional('VIEW_CACHE')
             ->boolean();
 
