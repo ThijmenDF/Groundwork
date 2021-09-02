@@ -17,7 +17,7 @@ class HttpException extends Exception
             "comment" => $this->getComment()
         ];
 
-        return view('Groundwork/Exception', $data);
+        return view('Exception', $data);
     }
 
     public function getComment() : string
