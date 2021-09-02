@@ -3,6 +3,7 @@
 namespace Groundwork\Validator\Rules;
 
 use Countable;
+use Groundwork\Request\FileUpload;
 use Groundwork\Validator\Rule;
 use Groundwork\Validator\TransformsValue;
 
@@ -13,8 +14,8 @@ class RequiredRule extends Rule
      */
     public function passes($value, array $params = []): bool
     {
-        if (isset($value['tmp_name'])) { // files must have a temp name (it's stored in the temporary folder)
-            return !empty($value['tmp_name']);
+        if ($value instanceof FileUpload) {
+            return !$value->hasError();
         }
 
         if (is_numeric($value)) {
