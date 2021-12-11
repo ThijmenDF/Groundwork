@@ -188,7 +188,7 @@ class Model implements JsonSerializable, Injection
      */
     public function getIdentifier() : ?int
     {
-        return $this->{$this->identifierKey};
+        return $this->{$this->getIdentifierKey()};
     }
 
     /**
@@ -198,7 +198,7 @@ class Model implements JsonSerializable, Injection
      */
     public function setIdentifier($id) : void
     {
-        $this->{$this->identifierKey} = (int) $id;
+        $this->{$this->getIdentifierKey()} = (int) $id;
     }
 
     /**
@@ -262,7 +262,9 @@ class Model implements JsonSerializable, Injection
     {
         $model = new static();
 
-        return self::newQuery($model)->where($model->getIdentifierKey(), $id)->first();
+        return self::newQuery($model)
+            ->where($model->getIdentifierKey(), $id)
+            ->first();
     }
 
     /**
@@ -394,7 +396,7 @@ class Model implements JsonSerializable, Injection
      */
     public function save() : bool
     {
-        if (!$this->dirty()) {
+        if (! $this->dirty()) {
             // No changes have been detected and so updating the database would be pointless.
             return true;
         }
@@ -476,13 +478,18 @@ class Model implements JsonSerializable, Injection
             ->delete();
     }
 
+    /**
+     * Permanently deletes the model. Same as calling `delete(true)`.
+     * 
+     * @return bool Whether it was successfully deleted.
+     */
     public function forceDelete() : bool
     {
         return $this->delete(true);
     }
 
     /**
-     * Restores a deleted model.
+     * Restores a soft-deleted model.
      * 
      * @return bool whether it was successfully restored.
      */
@@ -501,7 +508,7 @@ class Model implements JsonSerializable, Injection
     public function deleted() : bool
     {
         if ($this->softDeletes()) {
-            return $this->deleted_at !== null;
+            return ! is_null($this->deleted_at);
         }
 
         return false;
@@ -532,7 +539,7 @@ class Model implements JsonSerializable, Injection
             ->where($this->getIdentifierKey(), $this->getIdentifier())
             ->first();
 
-        if (!($result instanceof $this)) {
+        if (! ($result instanceof $this)) {
             return false;
         }
 

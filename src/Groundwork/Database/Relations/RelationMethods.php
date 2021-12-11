@@ -175,7 +175,7 @@ trait RelationMethods
     }
 
     /**
-     * Attempts to load the model saved to the morph key. It assumes the key name appended with _type and _id exist.
+     * Attempts to load the polymorphic model saved to the morph key. It assumes the key name appended with _type and _id exist.
      *
      * For example; If THIS model is a `HeaderImage`, you can get the `Post` or the `Profile` it was placed on using:
      *
@@ -199,7 +199,7 @@ trait RelationMethods
     }
 
     /**
-     * Fetches a model that could reference this model. The referenced model would have a morphKey appended with _type
+     * Fetches a polymorphic model that could reference this model. The referenced model would have a morphKey appended with _type
      * and _id, which should reference the current model. This is a 1:1 relationship (it only gets one model).
      *
      * For example; if THIS model is a `Post`, you can get a `HeaderImage` using:
@@ -223,7 +223,7 @@ trait RelationMethods
     }
 
     /**
-     * Fetches all models that references this model in their morph configuration. The referenced models would have a
+     * Fetches all polymorphic models that references this model in their morph configuration. The referenced models would have a
      * morphKey appended with _type and _id, which would reference the current model. This is a 1:many relationship.
      *
      * For example; if THIS model is a `Post`, you can get all its `Comments` using:
@@ -247,7 +247,7 @@ trait RelationMethods
     }
 
     /**
-     * Fetches all models that are referenced in an intermediate table which contains a polymorphic relationship. This
+     * Fetches all polymorphic models that are referenced in an intermediate table which contains a polymorphic relationship. This
      * is a many:many relationship.
      *
      * For example; if THIS model is a `Post`, we can get all `Tags` linked to this post which may also be linked to
@@ -277,7 +277,7 @@ trait RelationMethods
     }
 
     /**
-     * Fetches all models that are morphed through an intermediate table and are referenced by this model. This is an
+     * Fetches all polymorphic models that are morphed through an intermediate table and are referenced by this model. This is an
      * inverse of a many:many relationship.
      *
      * For example; if THIS model is a `Tag`, we can get all `Post` models that are linked, using:

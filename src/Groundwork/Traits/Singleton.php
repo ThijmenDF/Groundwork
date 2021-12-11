@@ -28,7 +28,7 @@ trait Singleton {
      */
     public static function getInstance() : self
     {
-        if (!self::$instance) {
+        if (! self::$instance) {
             self::$instance = new static();
         }
 

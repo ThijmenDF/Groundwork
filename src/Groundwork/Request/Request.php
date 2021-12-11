@@ -180,7 +180,7 @@ class Request implements Injection
     }
 
     /**
-     * Returns whether the request has a value that matches a 'trueish' value, aka 1, true, on or yes.
+     * Returns whether the request has a value that matches a 'true-ish' value, aka 1, true, on or yes.
      *
      * @param string $name
      *

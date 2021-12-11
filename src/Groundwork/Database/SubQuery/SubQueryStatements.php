@@ -308,7 +308,7 @@ trait SubQueryStatements
     private function validateOperator(string $operator, array $allowedOperators)
     {
         if (array_search($operator, $allowedOperators) === false) {
-            throw new InvalidArgumentException('Multiple Operator ' . $operator . ' is invalid.');
+            throw new InvalidArgumentException('Given subQuery Operator `' . $operator . '` is invalid.');
         }
     }
 }

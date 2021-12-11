@@ -181,6 +181,11 @@ trait CommonStatements {
         return $this;
     }
 
+    /**
+     * Only fetch deleted models.
+     * 
+     * @return static
+     */
     public function onlyDeleted() : self
     {
         $this->withDeleted();
