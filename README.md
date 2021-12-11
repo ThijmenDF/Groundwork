@@ -67,7 +67,7 @@ A project that implements this framework needs the following file structure:
 |   |---+ views <- Root for templates
 |
 |---+ routes <- Here all routers can be added. 
-|               File names don't matter, as long as thei're php files.
+|               File names don't matter, as long as they're php files.
 |---- .env <- Configuration file. see .env.example
 ```
 
