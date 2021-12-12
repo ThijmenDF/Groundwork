@@ -30,8 +30,8 @@ class Server {
     private function __construct(string $rootDirectory = null)
     {
         try {
-            new Config();
-            
+            new Config($rootDirectory);
+
             if (! Config::has('ROOT_DIR')) {
                 if (! is_null($rootDirectory)) {
                     throw new EnvConfigurationException('Missing root directory. See ROOT_DIR in the .env file.');

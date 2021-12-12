@@ -11,12 +11,21 @@ class Config {
     /**
      * By creating a new instance, the .env file will be loaded and the 'Config' extension will be run.
      *
+     * @param string $rootDirectory - The directory where the application is being run from. It's the parent directory of /public.
      * @throws EnvConfigurationException
      */
-    public function __construct()
+    public function __construct(string $rootDirectory)
     {
         $dotenv = new Dotenv();
-        $dotenv->load(root() . '.env');
+        $dotenv->load($rootDirectory . '.env');
+        
+        if (! self::has('ROOT_DIR')) {
+            if (is_null($rootDirectory)) {
+                throw new EnvConfigurationException('Missing root directory. See ROOT_DIR in the .env file.');
+            }
+            
+            self::set('ROOT_DIR', $rootDirectory);
+        }
 
         $this->checkVendorSettings();
 
@@ -82,6 +91,17 @@ class Config {
     }
 
     /**
+     * Sets a specific key in the environment configuration.
+     * 
+     * @param string $name
+     * @param mixed  $value
+     */
+    public static function set(string $name, $value) : void
+    {
+        $_ENV[$name] = $value;
+    }
+
+    /**
      * Creates a new validator and makes sure the key exists.
      *
      * @param string $name
@@ -134,17 +154,6 @@ class Config {
     public static function isDev() : bool
     {
         return static::get('APP_ENV') === 'dev';
-    }
-
-    /**
-     * Sets a specific key in the environment configuration.
-     * 
-     * @param string $name
-     * @param mixed  $value
-     */
-    public static function set(string $name, $value) : void
-    {
-        $_ENV[$name] = $value;
     }
 
 }
