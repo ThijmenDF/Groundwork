@@ -136,5 +136,15 @@ class Config {
         return static::get('APP_ENV') === 'dev';
     }
 
+    /**
+     * Sets a specific key in the environment configuration.
+     * 
+     * @param string $name
+     * @param mixed  $value
+     */
+    public static function set(string $name, $value) : void
+    {
+        $_ENV[$name] = $value;
+    }
 
 }

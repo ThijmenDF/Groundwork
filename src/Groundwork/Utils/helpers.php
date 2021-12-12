@@ -1,5 +1,6 @@
 <?php
 
+use Groundwork\Config\Config;
 use Groundwork\Database\Model;
 use Groundwork\Request\Request;
 use Groundwork\Response\RedirectResponse;
@@ -17,8 +18,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
  */
 function root() : string
 {
-    // document root *should* be in ./public, so going up 1 directory will bring us to the project root.
-    return $_SERVER['DOCUMENT_ROOT'] . '/../';
+    return Config::get('ROOT_DIR');
 }
 
 /**

@@ -27,14 +27,23 @@ class Server {
     // The router that loads up routes
     private Router $router;
 
-    private function __construct()
+    private function __construct(string $rootDirectory = null)
     {
         try {
             new Config();
+            
+            if (! Config::has('ROOT_DIR')) {
+                if (! is_null($rootDirectory)) {
+                    throw new EnvConfigurationException('Missing root directory. See ROOT_DIR in the .env file.');
+                }
+                
+                Config::set('ROOT_DIR', $rootDirectory);
+            }
         } catch (EnvConfigurationException $exception) {
             $this->processResult(new InternalServerErrorException('Incorrect environment configuration! - ' . $exception->getMessage()));
             exit;
         }
+
 
         if (!Config::isProd()) {
             // Set up the error handler only if not running in production.
