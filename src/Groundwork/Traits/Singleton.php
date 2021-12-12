@@ -26,10 +26,10 @@ trait Singleton {
      * 
      * @return static
      */
-    public static function getInstance() : self
+    public static function getInstance(...$arguments) : self
     {
         if (! self::$instance) {
-            self::$instance = new static();
+            self::$instance = new static(...$arguments);
         }
 
         return self::$instance;
