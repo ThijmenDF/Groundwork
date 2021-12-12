@@ -5,7 +5,7 @@ namespace Groundwork\Router;
 use Exception;
 use Groundwork\Injector\Injector;
 
-class Match
+class MatchedRoute
 {
     /** @var object The class instance */
     private object $class;

@@ -21,8 +21,8 @@ class Router {
     /** @var AltoRouter The external router instance */
     private AltoRouter $router;
 
-    /** @var Match|null The matched route */
-    private Match $match;
+    /** @var MatchedRoute|null The matched route */
+    private MatchedRoute $match;
 
     // Set up the router.
     private function __construct()
@@ -78,11 +78,11 @@ class Router {
     /**
      * Runs the route matching and returns the controller, method and params
      *
-     * @return Match
+     * @return MatchedRoute
      * @throws NotFoundException
      * @throws RouterConfigurationException
      */
-    public function matchRoutes() : Match
+    public function matchRoutes() : MatchedRoute
     {
         // Match the routes
         $match = $this->router->match(null, request()->method());
@@ -104,7 +104,7 @@ class Router {
             // Attempt to make a new instance of the controller
             $controller = new $controllerName;
 
-            $this->match = new Match($controller, $method, $match['params']);
+            $this->match = new MatchedRoute($controller, $method, $match['params']);
 
             // Return the controller instance, method and any parameters passed in the URL.
             return $this->match;
