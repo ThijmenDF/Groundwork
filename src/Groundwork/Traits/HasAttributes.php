@@ -74,18 +74,14 @@ trait HasAttributes {
      * 
      * @param string|int $key   The key or attribute name
      * @param mixed      $value The value to set
-     * 
-     * @return bool
      */
-    public function __set($key, $value) : bool
+    public function __set($key, $value) : void
     {
         $this->attributes[$key] = $value;
 
         if ($this->hasDates) {
             $this->attributes['updated_at'] = Carbon::now();
         }
-
-        return true;
     }
 
     /**
