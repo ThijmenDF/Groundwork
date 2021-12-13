@@ -17,10 +17,18 @@ The framework uses various external packages such as, but not limited to:
 To install, run `composer require thijmendf/groundwork`
 
 ### Initializing
-In order to start the framework, send all http requests (except for requests for files such as assets) to a single php file.
-In that file, you can use this code to start the framework:
+In order to start the framework, send all http requests (except for requests for files such as assets) to a single php file inside a 'public' folder. In there, simply require the following bootstrap code from your project root:
 ```php
 // File location: ./public/index.php
+
+require "../bootstrap.php";
+```
+
+In that bootstrap file, you can use this code to start the framework:
+```php
+// File location: ./bootstrap.php
+ini_set('display_errors', 'off');
+error_reporting(E_ALL);
 
 // Require the auto-loader
 require __DIR__ . '../vendor/autoload.php';
@@ -28,10 +36,11 @@ require __DIR__ . '../vendor/autoload.php';
 use Groundwork\Server;
 
 // Start the handle server
-$server = Server::getInstance();
+$server = Server::getInstance(__DIR__);
 
 // Handle the request
 $server->handle();
+
 ```
 
 And that's it. It'll automatically handle the requests and responses.
@@ -69,6 +78,8 @@ A project that implements this framework needs the following file structure:
 |---+ routes <- Here all routers can be added. 
 |               File names don't matter, as long as they're php files.
 |---- .env <- Configuration file. see .env.example
+|
+|---- bootstrap.php <- Main starting point for the framework.
 ```
 
 ### Extending
