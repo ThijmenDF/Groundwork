@@ -35,7 +35,7 @@ class Validator implements Injection
      *     ]
      * ];
      * ```
-     * Note that some rules have (optional) parameters. These parameters can be seperated by using a column `:`.
+     * Note that some rules have (optional) parameters. These parameters can be separated by using a column `:`.
      *
      * Some rules will stop the check of consequent rules if the value passes a certain check. An example is 'nullable',
      * which will stop any remaining rules from being applied to the value if the value is null.
@@ -156,7 +156,7 @@ class Validator implements Injection
     /**
      * Allows a Validator to be initialized through dependency injection.
      *
-     * @param $param
+     * @param mixed $param
      *
      * @return Injection
      * @throws ValidationFailedException
@@ -167,7 +167,7 @@ class Validator implements Injection
 
         $ok = $instance->validate();
 
-        if (!$ok && $instance->returnOnFailure) {
+        if (! $ok && $instance->returnOnFailure) {
             // return to the previous screen
             throw new ValidationFailedException;
         }

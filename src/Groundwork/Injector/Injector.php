@@ -6,6 +6,7 @@ use Groundwork\Exceptions\ValidationFailedException;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
+use ReflectionNamedType;
 use ReflectionParameter;
 
 class Injector
@@ -67,40 +68,67 @@ class Injector
         $params = table($params);
         $returned = table();
 
-        $parameters = table($method->getParameters());
+        table($method->getParameters())
+            ->each(function (ReflectionParameter $definition) use($params, $returned) {
+                $key = $definition->getName();
 
-        $parameters->each(function (ReflectionParameter $definition) use($params, $returned) {
-            $key = $definition->getName();
-            $class = $definition->getClass();
-
-            // If the key also exists in the parameter list...
-            if ($params->has($key)) {
-                if ($definition->getType()->isBuiltin() || is_null($class)) {
-                    // a built-in type is automatically cast, and if there's no class, just set it directly too.
-                    $returned->set($key, $params->get($key));
-                    return;
-                }
-
-                $name = $class->getName();
-
-                if ($class->implementsInterface(Injection::class)) {
-                    // if the class implements the Injection interface, call that.
-                    $returned->set($key, call_user_func($name . '::__inject', $params->get($key)));
-                }
-                else {
-                    // otherwise, make a new instance of the class with the key given as its first and only parameter.
-                    $returned->set($key, new $name($params->get($key)));
-                }
-            }
-            // The key isn't given.
-            elseif (!is_null($class) && $class->implementsInterface(Injection::class)) {
-                $returned->set($key, call_user_func($class->getName() . '::__inject', null));
-            }
-            else {
-                $returned->set($key, null);
-            }
-        });
+                $returned->set($key, $this->handleProvisioning($definition, $params->get($key)));
+            });
 
         return $returned->all();
+    }
+
+    /**
+     * Processes each parameter of the requested method and its equally named value from the given array.
+     * 
+     * @param ReflectionParameter $definition
+     * @param mixed               $value
+     * 
+     * @return mixed The result from the class or value
+     */
+    protected function handleProvisioning(ReflectionParameter $definition, $value)
+    {
+        $type = $this->getFirstType($definition->getType());
+
+        if (is_null($type)) { // Null types can't be transformed.
+            return $value;
+        }
+
+        $name = $type->getName();
+
+        if ($type->isBuiltin()) { // Built-in types can be transformed by PHP itself.
+            return $value;
+        }
+        
+        // All other types *should* have a class
+        $class = new ReflectionClass($type->getName());
+
+        if ($class->implementsInterface(Injection::class)) {
+            // if the class implements the Injection interface, call that.
+            return call_user_func($name . '::__inject', $value);
+        }
+
+        // otherwise, make a new instance of the class with the value given as its first and only parameter.
+        return new $name($value);
+    }
+
+    /**
+     * Returns the first ReflectionNamedType it can find.
+     * 
+     * @param ReflectionNamedType|ReflectionUnionType|null $type
+     * 
+     * @return ReflectionNamedType|null
+     */
+    protected function getFirstType($type) : ?ReflectionNamedType
+    {
+        if ($type instanceof ReflectionNamedType || is_null($type)) {
+            return $type;
+        }
+
+        $types = $type->getTypes();
+
+        for ($i = 0; $i < count($types); $i++) {
+            return $this->getFirstType($types[$i]);
+        }
     }
 }
