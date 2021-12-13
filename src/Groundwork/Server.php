@@ -2,7 +2,6 @@
 
 namespace Groundwork;
 
-use Dotenv\Exception\ValidationException;
 use Error;
 use Exception;
 use Groundwork\Config\Config;
