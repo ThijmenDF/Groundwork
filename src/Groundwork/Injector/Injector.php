@@ -2,6 +2,7 @@
 
 namespace Groundwork\Injector;
 
+use BadMethodCallException;
 use Groundwork\Exceptions\ValidationFailedException;
 use ReflectionClass;
 use ReflectionException;
@@ -36,18 +37,29 @@ class Injector
      * Calls the method with the parameters it requested. Parameters are filled through the $params param, or from the
      * __inject method if no parameter with such name exists.
      *
-     * @param string $method The method to call
-     * @param array  $params The params to give the method. These may get overwritten through dependency injection.
+     * @param string|null $method The method to call
+     * @param array       $params The params to give the method. These may get overwritten through dependency injection.
      *
      * @return false|mixed
      * @throws ReflectionException|ValidationFailedException
      */
-    public function provide(string $method, array $params)
+    public function provide(?string $method = null, array $params = [])
     {
-        return call_user_func_array(
-            [$this->class, $method],
-            $this->inject($this->reflection->getMethod($method), $params)
-        );
+        if (is_null($method)) {
+            return new $this->class(
+                ...$this->inject($this->reflection->getConstructor(), $params)
+            );
+        }
+        
+        if (method_exists($this->class, $method)) {
+            return call_user_func_array(
+                [$this->class, $method],
+                $this->inject($this->reflection->getMethod($method), $params)
+            );
+        }
+
+
+        throw new BadMethodCallException('Method ' . $method . ' could not be found on ' . $this->class);
     }
 
     /**
@@ -63,8 +75,12 @@ class Injector
      * @todo improve functionality by allowing non-associative arrays to work.
      * @throws ValidationFailedException
      */
-    public function inject(ReflectionMethod $method, array $params) : array
+    public function inject(?ReflectionMethod $method, array $params) : array
     {
+        if (is_null($method)) {
+            return $params;
+        }
+        
         $params = table($params);
         $returned = table();
 

@@ -8,12 +8,15 @@ use Groundwork\Config\Config;
 use Groundwork\Database\Model;
 use Groundwork\Exceptions\Http\NotFoundException;
 use Groundwork\Exceptions\RouterConfigurationException;
+use Groundwork\Injector\Injector;
 use Groundwork\Migration\Migrator;
 use Groundwork\Traits\Singleton;
 use Groundwork\Utils\Files\FileHandler;
 use Groundwork\Utils\Files\FileInfo;
 
 class Router {
+
+    use RouteMatching;
 
     // Only one instance of the Router may exist at once.
     use Singleton;
@@ -36,6 +39,8 @@ class Router {
 
         // Load the routes
         $this->loadRoutes();
+
+        $this->setupRoutes();
     }
     
     /**
@@ -43,13 +48,24 @@ class Router {
      */
     private function loadRoutes() : void
     {
-        $router = $this->router;
-
         FileHandler::scan(root() . 'routes', '.php')
-            ->each(function(FileInfo $file) use($router) {
+            ->each(function(FileInfo $file) {
+                $router = $this;
                 // Load the user-defined routes
                 require $file->path();
             });
+
+    }
+
+    private function setupRoutes() : void
+    {
+        /** @var RouteDefinition $route */
+        foreach ($this->routes as $route) {
+            $handler = $route->handler;
+            $handler[2] = $route->middleware;
+
+            $this->router->map($route->method, $route->url, $handler, $route->name);
+        }
     }
 
     /**
@@ -59,17 +75,17 @@ class Router {
     {
         try {
             // Migrate
-            $this->router->map('GET', '/migrations/migrate', [Migrator::class, 'migrate'], 'migrator-migrate');
+            $this->get('/migrations/migrate', [Migrator::class, 'migrate'])->name('migrator-migrate');
 
             // Rollback
-            $this->router->map('GET', '/migrations/rollback/[i:steps]?', [Migrator::class, 'rollback'], 'migrator-rollback');
+            $this->get('/migrations/rollback/[i:steps]?', [Migrator::class, 'rollback'])->name('migrator-rollback');
 
             // Seed the DB
-            $this->router->map('GET', '/migrations/seed', [Migrator::class, 'seed'], 'migrator-seed');
+            $this->get('/migrations/seed', [Migrator::class, 'seed'])->name('migrator-seed');
 
             // reset the DB
-            $this->router->map('GET', '/migrations/purge', [Migrator::class, 'queryPurge'], 'migrator-purge-query');
-            $this->router->map('GET', '/migrations/purge/confirm', [Migrator::class, 'purge'], 'migrator-purge');
+            $this->get('/migrations/purge', [Migrator::class, 'queryPurge'])->name('migrator-purge-query');
+            $this->get('/migrations/purge/confirm', [Migrator::class, 'purge'])->name('migrator-purge');
         } catch (Exception $exception) {
             error_log('Exception loading vendor routes! ' . $exception->getMessage());
         }
@@ -90,21 +106,20 @@ class Router {
         // A route was matched
         if ($match) {
             // See what the user wanted to run
-            $method = 'index';
-            if (is_array($match['target'])) {
-                $controllerName = $match['target'][0];
-                $method = $match['target'][1];
-            } elseif (is_string($match['target'])) {
-                $controllerName = $match['target'];
-            } else {
+            if (! is_array($match['target'])) {
                 // Unknown route target. Other features such as inline functions are not supported (for now).
                 throw new RouterConfigurationException;
             }
 
-            // Attempt to make a new instance of the controller
-            $controller = new $controllerName;
+            $controllerName = $match['target'][0];
+            $method = $match['target'][1] ?? 'index';
+            $middleware = $match['target'][2];
 
-            $this->match = new MatchedRoute($controller, $method, $match['params']);
+            // Attempt to make a new instance of the controller
+            $injector = new Injector($controllerName);
+            $controller = $injector->provide();
+
+            $this->match = new MatchedRoute($controller, $method, $match['params'], $middleware);
 
             // Return the controller instance, method and any parameters passed in the URL.
             return $this->match;

@@ -17,7 +17,7 @@ The framework uses various external packages such as, but not limited to:
 To install, run `composer require thijmendf/groundwork`
 
 ### Initializing
-In order to start the framework, send all http requests (except for requests for files such as assets) to a single php file inside a 'public' folder. In there, simply require the following bootstrap code from your project root:
+In order to start the framework, send all http requests (except for requests for files such as assets) to a single php file inside a `public` folder. In there, simply require the following bootstrap code from your project root:
 ```php
 // File location: ./public/index.php
 
@@ -58,6 +58,8 @@ A project that implements this framework needs the following file structure:
 |   |---+ Extensions <- Extending Groundwork
 |   |
 |   |---+ Requests <- Validating form requests
+|   |
+|   |---+ Middleware <- Middleware defined in the routes
 |
 |---+ cache <- Caching various systems such as the templates
 |
