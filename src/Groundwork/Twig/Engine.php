@@ -42,7 +42,7 @@ class Engine
         $this->twig->addFunction(new TwigFunction('hasError', fn(string $name)  => hasError($name)));
         $this->twig->addFunction(new TwigFunction('getError', fn(string $name)  => getError($name)));
 
-        ExtensionHandler::loadExtension("Rendering", $this->twig);
+        ExtensionHandler::loadExtension("Renderer", $this->twig);
     }
 
     /**

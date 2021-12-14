@@ -729,7 +729,7 @@ class Table implements IteratorAggregate, Countable, ArrayAccess, JsonSerializab
             $reversed = array_reverse($this->values);
 
             // Push the item to the back
-            array_push($reversed, $value);
+            $reversed[] = $value;
 
             // Reverse it again
             $this->values = array_reverse($reversed);
@@ -1035,7 +1035,6 @@ class Table implements IteratorAggregate, Countable, ArrayAccess, JsonSerializab
 
             return $this;
         }
-
 
         /**
          * Combines the table with another array. Unlike merge, if there's a duplicate item, the original version will

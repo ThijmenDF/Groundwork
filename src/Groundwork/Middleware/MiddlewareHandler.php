@@ -1,6 +1,6 @@
 <?php
 
-namespace Groundwork\Router;
+namespace Groundwork\Middleware;
 
 use Closure;
 use Groundwork\Request\Request;

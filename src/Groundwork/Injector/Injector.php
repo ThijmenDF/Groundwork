@@ -23,14 +23,16 @@ class Injector
      * act as a dependency injector for the given method name. Only works for non-static methods.
      *
      * @param string|object $class
-     *
-     * @throws ReflectionException
      */
     public function __construct($class)
     {
         $this->class = $class;
 
-        $this->reflection = new ReflectionClass($class);
+        try {
+            $this->reflection = new ReflectionClass($class);
+        } catch (ReflectionException $ex) {
+            throw new \InvalidArgumentException('The given class could not be reflected', 0, $ex);
+        }
     }
 
     /**
@@ -40,8 +42,7 @@ class Injector
      * @param string|null $method The method to call
      * @param array       $params The params to give the method. These may get overwritten through dependency injection.
      *
-     * @return false|mixed
-     * @throws ReflectionException|ValidationFailedException
+     * @return mixed
      */
     public function provide(?string $method = null, array $params = [])
     {
@@ -52,10 +53,14 @@ class Injector
         }
         
         if (method_exists($this->class, $method)) {
-            return call_user_func_array(
-                [$this->class, $method],
-                $this->inject($this->reflection->getMethod($method), $params)
-            );
+            try {
+                return call_user_func_array(
+                    [$this->class, $method],
+                    $this->inject($this->reflection->getMethod($method), $params)
+                );
+            } catch (ReflectionException $ex) {
+                return null;
+            }
         }
 
 
@@ -67,13 +72,12 @@ class Injector
      * through the class' `__inject` method. Should `$params` not contain such a key, it'll be injected with the `__inject`
      * method. If none of those conditions are met, the value will be `null`.
      *
-     * @param ReflectionMethod $method
-     * @param array            $params
+     * @param ReflectionMethod|null $method
+     * @param array                 $params
      *
      * @return array
      *
      * @todo improve functionality by allowing non-associative arrays to work.
-     * @throws ValidationFailedException
      */
     public function inject(?ReflectionMethod $method, array $params) : array
     {
@@ -96,10 +100,10 @@ class Injector
 
     /**
      * Processes each parameter of the requested method and its equally named value from the given array.
-     * 
+     *
      * @param ReflectionParameter $definition
      * @param mixed               $value
-     * 
+     *
      * @return mixed The result from the class or value
      */
     protected function handleProvisioning(ReflectionParameter $definition, $value)
@@ -117,11 +121,15 @@ class Injector
         }
         
         // All other types *should* have a class
-        $class = new ReflectionClass($type->getName());
+        try {
+            $class = new ReflectionClass($type->getName());
 
-        if ($class->implementsInterface(Injection::class)) {
-            // if the class implements the Injection interface, call that.
-            return call_user_func($name . '::__inject', $value);
+            if ($class->implementsInterface(Injection::class)) {
+                // if the class implements the Injection interface, call that.
+                return call_user_func($name . '::__inject', $value);
+            }
+        } catch (ReflectionException $ex) {
+            // do nothing...
         }
 
         // otherwise, make a new instance of the class with the value given as its first and only parameter.
@@ -143,8 +151,6 @@ class Injector
 
         $types = $type->getTypes();
 
-        for ($i = 0; $i < count($types); $i++) {
-            return $this->getFirstType($types[$i]);
-        }
+        return $this->getFirstType($types[0]);
     }
 }

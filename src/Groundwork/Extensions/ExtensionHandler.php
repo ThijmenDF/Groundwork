@@ -2,6 +2,8 @@
 
 namespace Groundwork\Extensions;
 
+use Groundwork\Injector\Injector;
+
 abstract class ExtensionHandler
 {
     /**
@@ -14,11 +16,13 @@ abstract class ExtensionHandler
      */
     public static function loadExtension(string $name, object $object)
     {
-        $className = "\\App\\Extensions\\$name";
+        $className = "App\\Extensions\\$name";
 
         if (class_exists($className)) {
+            $injector = new Injector($className);
+
             /** @var Extension $extension */
-            $extension = new $className();
+            $extension = $injector->provide();
 
             $extension->build($object);
         }

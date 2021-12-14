@@ -15,9 +15,6 @@ use Groundwork\Response\View;
 use Groundwork\Router\Router;
 use Groundwork\Traits\Singleton;
 use Groundwork\Twig\Engine;
-use Twig\Error\LoaderError;
-use Twig\Error\RuntimeError;
-use Twig\Error\SyntaxError;
 
 class Server {
 
@@ -89,9 +86,9 @@ class Server {
      * @param mixed    $result
      * @param int|null $code
      *
-     * @throws LoaderError
-     * @throws RuntimeError
-     * @throws SyntaxError
+     * @throws \Twig\Error\LoaderError
+     * @throws \Twig\Error\RuntimeError
+     * @throws \Twig\Error\SyntaxError
      */
     private function processResult($result, int $code = null) : void
     {
