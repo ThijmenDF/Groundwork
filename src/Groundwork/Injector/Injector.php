@@ -63,8 +63,7 @@ class Injector
             }
         }
 
-
-        throw new BadMethodCallException('Method ' . $method . ' could not be found on ' . $this->class);
+        throw new BadMethodCallException('Method ' . $method . ' could not be found on ' . get_class($this->class));
     }
 
     /**

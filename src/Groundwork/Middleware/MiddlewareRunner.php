@@ -12,13 +12,16 @@ class MiddlewareRunner
 {
     protected Table $middleware;
 
+    /**
+     * @param Table $middleware The list of middleware to execute in-order.
+     */
     public function __construct(Table $middleware)
     {
         $this->middleware = $middleware;
     }
 
     /**
-     * Runs the given middleware in order and finally runs the passed handler.
+     * Runs the given middleware in-order and finally runs the passed handler.
      *
      * @param Request $request The generic Request object to pass into each middleware.
      * @param Closure $handler The handler for the target action, after all middleware have run.

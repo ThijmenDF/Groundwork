@@ -130,10 +130,10 @@ function session() : Session
  */
 function route(string $name, $data = []) : string
 {
-    // Fetch the server instance which has the routes mapped.
+    // Fetch the router instance which has the routes mapped.
     $router = Router::getInstance();
 
-    if (!is_array($data)) {
+    if (! is_array($data)) {
         $data = ['id' => $data];
     }
 
