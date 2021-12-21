@@ -11,10 +11,11 @@ class Config {
     /**
      * By creating a new instance, the .env file will be loaded and the 'Config' extension will be run.
      *
-     * @param string $rootDirectory - The directory where the application is being run from. It's the parent directory of /public.
+     * @param string|null $rootDirectory - The directory where the application is being run from. It's the parent directory of /public.
+     *
      * @throws EnvConfigurationException
      */
-    public function __construct(string $rootDirectory)
+    public function __construct(?string $rootDirectory)
     {
         $dotenv = new Dotenv();
         $dotenv->load($rootDirectory . '.env');
@@ -75,7 +76,7 @@ class Config {
      * @return string|bool|int|null
      */
     public static function get(string $name, $default = null) {
-        return $_ENV[$name] ?? $default;
+        return self::has($name) ? $_ENV[$name] : $default;
     }
 
     /**
