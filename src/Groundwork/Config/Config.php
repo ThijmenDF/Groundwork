@@ -82,7 +82,7 @@ class Config {
 
         $value = $_ENV[$name];
 
-        if ($value === 'false' || $value === '0') {
+        if ($value === 'false') {
             return false;
         }
 
