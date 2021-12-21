@@ -76,7 +76,17 @@ class Config {
      * @return string|bool|int|null
      */
     public static function get(string $name, $default = null) {
-        return self::has($name) ? $_ENV[$name] : $default;
+        if (! self::has($name)) {
+            return $default;
+        }
+
+        $value = $_ENV[$name];
+
+        if ($value === 'false' || $value === '0') {
+            return false;
+        }
+
+        return $value;
     }
 
     /**
