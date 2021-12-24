@@ -5,11 +5,14 @@ namespace Groundwork;
 use Error;
 use Exception;
 use Groundwork\Config\Config;
+use Groundwork\Container\Container;
+use Groundwork\Database\Db;
 use Groundwork\Database\Pagination\PaginatedResult;
 use Groundwork\Exceptions\EnvConfigurationException;
 use Groundwork\Exceptions\Http\HttpException;
 use Groundwork\Exceptions\Http\InternalServerErrorException;
 use Groundwork\Exceptions\ValidationFailedException;
+use Groundwork\Extensions\ExtensionHandler;
 use Groundwork\Response\Response;
 use Groundwork\Response\View;
 use Groundwork\Router\Router;
@@ -19,9 +22,13 @@ use Groundwork\Twig\Engine;
 class Server {
 
     use Singleton;
-    
-    // The router that loads up routes
-    private Router $router;
+
+    /**
+     * Holds the container instance.
+     *
+     * @var Container
+     */
+    protected Container $container;
 
     private function __construct(string $rootDirectory = null)
     {
@@ -32,14 +39,56 @@ class Server {
             exit;
         }
 
+        $this->bootstrap();
 
         if (!Config::isProd()) {
             // Set up the error handler only if not running in production.
             $this->setupWhoops();
         }
 
-        // Load up the router
-        $this->router = Router::getInstance();
+    }
+
+    /**
+     * Starts the application's container instance and registers some of its features.
+     *
+     * Also loads the 'bootstrap' extension handler and gives it the raw container instance.
+     *
+     * @return void
+     */
+    protected function bootstrap()
+    {
+        $this->container = new Container();
+
+        // Register the router, and make a new instance of it.
+        $this->container->register('router', new Router());
+
+        // Register the database client.
+        $this->container->register('db', Db::class);
+
+        // Register the twig render engine.
+        $this->container->register('twig', Engine::class);
+
+        ExtensionHandler::loadExtension('bootstrap', $this->container);
+    }
+
+    /**
+     * Returns the instance of the given identifier, or sets a new instance.
+     *
+     * @param string             $identifier
+     * @param object|string|null $instance A new instance to save with the identifier.
+     *
+     * @return mixed|null
+     * @noinspection PhpUnhandledExceptionInspection
+     * @noinspection PhpDocMissingThrowsInspection
+     */
+    public function container(string $identifier, $instance = null)
+    {
+        if ($instance) {
+            $this->container->register($identifier, $instance);
+            return true;
+        } else {
+            return $this->container->get($identifier);
+        }
     }
 
     /**
@@ -50,7 +99,7 @@ class Server {
     public function handle() : void
     {
         try {
-            $match = $this->router->matchRoutes();
+            $match = instance('router')->matchRoutes();
 
             $result = $match->call();
         }
@@ -95,7 +144,7 @@ class Server {
         switch (true) {
             case $result instanceof View:
                 // Parse the View and re-run this method with the content as a response
-                $engine = Engine::getInstance();
+                $engine = instance('twig');
 
                 $this->processResult(
                     response($engine->render($result)),

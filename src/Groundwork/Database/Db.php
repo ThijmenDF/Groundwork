@@ -7,19 +7,16 @@ use Groundwork\Exceptions\Database\ConnectionException;
 use Groundwork\Exceptions\Database\DatabaseException;
 use Groundwork\Exceptions\Database\QueryBindingException;
 use Groundwork\Exceptions\Database\QueryException;
-use Groundwork\Traits\Singleton;
 use mysqli;
 use mysqli_result;
 use mysqli_stmt;
 use stdClass;
 
 /**
- * MySQLConnection Class
- * Adds various functions for easy database connectivity
+ * MySQLConnection Class.
+ * Adds various functions for easy database connectivity.
  */
 class Db {
-
-    use Singleton;
     
     private mysqli $conn;
     private ?mysqli_result $result = null;
@@ -33,7 +30,7 @@ class Db {
      * Constructs a new mysqli connection.
      * @throws ConnectionException when it's unable to connect to the database
      */
-    private function __construct() 
+    public function __construct()
     {
         $this->conn = new mysqli(
             Config::get('DB_HOST', 'localhost'),

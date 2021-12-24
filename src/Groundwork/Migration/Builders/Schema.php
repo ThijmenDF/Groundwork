@@ -119,22 +119,22 @@ class Schema implements Builder {
     /**
      * Executes the schema.
      *
-     * @throws DatabaseException
      * @return bool
      */
     public function execute() : bool
     {
         $queries = $this->build();
-        $db = Db::getInstance();
+        /** @var Db $db */
+        $db = instance('db');
 
-        return $queries->every(function(string $query) use($db) {
+        return $queries->every(function (string $query) use ($db) {
             $result = $db->raw($query);
 
-            if (!$result) {
+            if (! $result) {
                 throw new DatabaseException("Schema failed to run! " . $db->error() . " - SQL: $query");
             }
 
-            return !!$result;
+            return true;
         });
     }
 }

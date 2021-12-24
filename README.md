@@ -90,6 +90,11 @@ You can also extend certain features by making a class in the `/App/Extensions` 
 The following components can be extended:
 * `App/Extensions/Renderer` For adding twig functions, filters etc.
 * `App/Extensions/Config` For verifying .env configuration. New items can be verified by using `Config::required()` or `Config::optional()`.
+* `App/Extensions/Bootstrap` For starting the framework and registering any container instances. New instances can be passed by using: 
+   1. `$container->register('identifier', new TargetClass());` or 
+   2. As `$container->register('identifier', 'App/Namespaces/TargetClass');` (or `TargetClass::class`). 
+  
+  Class paths mean the target class will only be instanced whenever it's requested (lazy loading).
 * More coming soon.
 
 ### Contributing

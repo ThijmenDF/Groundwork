@@ -12,12 +12,10 @@ use Twig\TwigFunction;
 
 class Engine
 {
-    use Singleton;
-
     /** @var Environment The Twig environment */
     protected Environment $twig;
 
-    private function __construct()
+    public function __construct()
     {
         $this->init();
     }

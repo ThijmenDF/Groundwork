@@ -18,9 +18,6 @@ class Router {
 
     use RouteMatching;
 
-    // Only one instance of the Router may exist at once.
-    use Singleton;
-
     /** @var AltoRouter The external router instance */
     private AltoRouter $router;
 
@@ -28,7 +25,7 @@ class Router {
     private MatchedRoute $match;
 
     // Set up the router.
-    private function __construct()
+    public function __construct()
     {
         // Set up a new Router instance
         $this->router = new AltoRouter();

@@ -484,7 +484,8 @@ class Query {
      */
     private function runQuery(string $query, BaseTable $bindings)
     {
-        $db = Db::getInstance();
+        /** @var Db $db */
+        $db = instance('db');
 
         $statement = $db->prepare($query);
 

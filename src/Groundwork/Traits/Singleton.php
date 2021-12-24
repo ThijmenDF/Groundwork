@@ -17,7 +17,7 @@ trait Singleton {
     /**
      * The instance stored for this class
      * 
-     * @var self $instance
+     * @var static $instance
      */
     protected static $instance = null;
 

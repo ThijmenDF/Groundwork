@@ -17,7 +17,8 @@
         "symfony/var-dumper": "^5.3",
         "twig/twig": "^3.3",
         "symfony/dotenv": "5.4.x-dev",
-        "phpmailer/phpmailer": "dev-master"
+        "phpmailer/phpmailer": "dev-master",
+        "psr/container": "^2.0.2"
     },
     "require-dev": {
         "filp/whoops": "^2.14"

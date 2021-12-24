@@ -138,7 +138,8 @@ class Migrator {
     public function queryPurge()
     {
         try {
-            $db = Db::getInstance();
+            /** @var Db $db */
+            $db = instance('db');
         } 
         catch (Exception $ex) {
             dd("Unable to connect to db." . $ex->getMessage());
@@ -161,7 +162,8 @@ class Migrator {
         echo "<pre>";
 
         try {
-            $db = Db::getInstance();
+            /** @var Db $db */
+            $db = instance('db');
         }
         catch (Exception $ex) {
             echo "Unable to connect to db." . $ex->getMessage() . "</pre>";
@@ -200,7 +202,8 @@ class Migrator {
     private function checkDatabase()
     {
         try {
-            $db = Db::getInstance();
+            /** @var Db $db */
+            $db = instance('db');
         } 
         catch (Exception $ex) {
             dd("Unable to connect to db." . $ex->getMessage());

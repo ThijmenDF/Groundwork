@@ -7,6 +7,7 @@ use Groundwork\Response\RedirectResponse;
 use Groundwork\Response\Response;
 use Groundwork\Response\View;
 use Groundwork\Router\Router;
+use Groundwork\Server;
 use Groundwork\Utils\Table;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -19,6 +20,18 @@ use Symfony\Component\HttpFoundation\Session\Session;
 function root() : string
 {
     return Config::get('ROOT_DIR');
+}
+
+/**
+ * Returns the instance of the given identifier.
+ *
+ * @param string $identifier
+ *
+ * @return mixed
+ */
+function instance(string $identifier)
+{
+    return Server::getInstance()->container($identifier);
 }
 
 /**
@@ -131,7 +144,8 @@ function session() : Session
 function route(string $name, $data = []) : string
 {
     // Fetch the router instance which has the routes mapped.
-    $router = Router::getInstance();
+    /** @var Router $router */
+    $router = instance('router');
 
     if (! is_array($data)) {
         $data = ['id' => $data];
@@ -148,7 +162,8 @@ function route(string $name, $data = []) : string
  */
 function route_name() : ?string
 {
-    $router = Router::getInstance();
+    /** @var Router $router */
+    $router = instance('router');
 
     return $router->getRouteName();
 }
@@ -160,7 +175,8 @@ function route_name() : ?string
  */
 function route_params() : ?array
 {
-    $router = Router::getInstance();
+    /** @var Router $router */
+    $router = instance('router');
 
     return $router->getParams();
 }
