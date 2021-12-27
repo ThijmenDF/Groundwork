@@ -8,9 +8,7 @@ use Groundwork\Config\Config;
 use Groundwork\Database\Model;
 use Groundwork\Exceptions\Http\NotFoundException;
 use Groundwork\Exceptions\RouterConfigurationException;
-use Groundwork\Injector\Injector;
 use Groundwork\Migration\Migrator;
-use Groundwork\Traits\Singleton;
 use Groundwork\Utils\Files\FileHandler;
 use Groundwork\Utils\Files\FileInfo;
 
@@ -22,9 +20,13 @@ class Router {
     private AltoRouter $router;
 
     /** @var MatchedRoute|null The matched route */
-    private MatchedRoute $match;
+    private ?MatchedRoute $match;
 
-    // Set up the router.
+    /**
+     * Sets up AltoRouter and loads in the routes.
+     *
+     * @throws Exception
+     */
     public function __construct()
     {
         // Set up a new Router instance
@@ -46,14 +48,19 @@ class Router {
     private function loadRoutes() : void
     {
         FileHandler::scan(root() . 'routes', '.php')
-            ->each(function(FileInfo $file) {
+            ->each(function (FileInfo $file) {
                 $router = $this;
                 // Load the user-defined routes
                 require $file->path();
             });
-
     }
 
+    /**
+     * Applies the routes that were set up earlier and saves their middleware to the target handler.
+     *
+     * @return void
+     * @throws Exception
+     */
     private function setupRoutes() : void
     {
         /** @var RouteDefinition $route */
@@ -105,21 +112,11 @@ class Router {
             // See what the user wanted to run
             if (! is_array($match['target'])) {
                 // Unknown route target. Other features such as inline functions are not supported (for now).
-                throw new RouterConfigurationException;
+                throw new RouterConfigurationException('Matched route ' . $match['name'] . ' has been improperly configured.');
             }
 
-            $controllerName = $match['target'][0];
-            $method = $match['target'][1] ?? 'index';
-            $middleware = $match['target'][2];
-
-            // Attempt to make a new instance of the controller
-            $injector = new Injector($controllerName);
-            $controller = $injector->provide();
-
-            $this->match = new MatchedRoute($controller, $method, $match['params'], $middleware);
-
-            // Return the controller instance, method and any parameters passed in the URL.
-            return $this->match;
+            // Return the matched route as a new object.
+            return $this->match = new MatchedRoute($match);
         }
 
         // No match, throw an NotFound exception, which will be shown as a nice looking exception page.
@@ -141,11 +138,12 @@ class Router {
     {
         $data = table($data);
 
-        $data->transform(function($item) {
+        $data->transform(function ($item) {
             if ($item instanceof Model) {
                 // Extract the models identifier
                 return $item->getIdentifier();
             }
+
             return $item;
         });
 
@@ -159,7 +157,7 @@ class Router {
      */
     public function getRouteName() : ?string
     {
-        return $this->match['name'] ?? null;
+        return $this->match ? $this->match->getName() : null;
     }
 
     /**
@@ -169,7 +167,7 @@ class Router {
      */
     public function getParams() : ?array
     {
-        return $this->match['params'] ?? null;
+        return $this->match ? $this->match->getParams() : null;
     }
 
 }

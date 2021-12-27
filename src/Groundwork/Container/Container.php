@@ -2,6 +2,7 @@
 
 namespace Groundwork\Container;
 
+use Groundwork\Exceptions\Container\NotFoundException;
 use Groundwork\Injector\Injector;
 use Groundwork\Utils\Table;
 use Psr\Container\ContainerInterface;
@@ -53,7 +54,7 @@ class Container implements ContainerInterface
         $injector = new Injector($instance);
 
         // Provide the __construct method.
-        $instance = $injector->provide();
+        $instance = $injector->construct();
 
         // Save the new instance to the stack.
         $this->register($id, $instance);

@@ -8,10 +8,13 @@ use Groundwork\Middleware\MiddlewareRunner;
 use Groundwork\Request\Request;
 use Groundwork\Utils\Table;
 
+/**
+ * An instance of a matched route. Can be 'called'
+ */
 class MatchedRoute
 {
-    /** @var object The class instance */
-    private object $class;
+    /** @var string The class name(space) */
+    private string $class;
 
     /** @var string The method to be called */
     private string $method;
@@ -22,12 +25,16 @@ class MatchedRoute
     /** @var Table A table of middleware names to execute for this request. */
     private Table $middleware;
 
-    public function __construct(object $class, string $method, array $params, array $middleware = [])
+    /** @var string|null The name of the route */
+    private ?string $name;
+
+    public function __construct(array $match)
     {
-        $this->class      = $class;
-        $this->method     = $method;
-        $this->params     = $params;
-        $this->middleware = table($middleware);
+        $this->class      = $match['target'][0];
+        $this->method     = $match['target'][1] ?? 'index';
+        $this->params     = $match['params'];
+        $this->name       = $match['name'];
+        $this->middleware = table($match['target'][2] ?? []);
     }
 
     /**
@@ -38,12 +45,62 @@ class MatchedRoute
      */
     public function call()
     {
-        // Before we start calling the final method, call all middleware, in order, first.
+        // Before we start calling the final method, call all middleware, in order.
         return $this->callMiddleware(request());
     }
 
     /**
-     * Calls the next middleware in the stack.
+     * Returns the route's name, if any was set.
+     *
+     * @return string|null
+     */
+    public function getName() : ?string
+    {
+        return $this->name;
+    }
+
+    /**
+     * Returns the 'controller' class.
+     *
+     * @return string
+     */
+    public function getClass() : string
+    {
+        return $this->class;
+    }
+
+    /**
+     * Returns the 'controller' method.
+     *
+     * @return string
+     */
+    public function getMethod() : string
+    {
+        return $this->method;
+    }
+
+    /**
+     * Returns the params from the matched URL.
+     *
+     * @return array
+     */
+    public function getParams() : array
+    {
+        return $this->params;
+    }
+
+    /**
+     * Returns a readonly version of the middleware table.
+     *
+     * @return Table
+     */
+    public function getMiddleware() : Table
+    {
+        return $this->middleware->clone();
+    }
+
+    /**
+     * Calls the next middleware in the stack. Returns the response from either a middleware, or the final call handler.
      *
      * @param Request $request
      *
@@ -63,6 +120,10 @@ class MatchedRoute
     {
         $injector = new Injector($this->class);
 
+        // Builds up the class instance.
+        $injector->construct();
+
+        // Call the desired method on the, now instanced, class.
         return $injector->provide($this->method, $this->params);
     }
 }

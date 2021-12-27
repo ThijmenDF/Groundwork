@@ -181,7 +181,6 @@ function route_params() : ?array
     return $router->getParams();
 }
 
-
 /**
  * Get the class "basename" of the given object / class.
  *

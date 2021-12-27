@@ -15,6 +15,7 @@ use Groundwork\Exceptions\ValidationFailedException;
 use Groundwork\Extensions\ExtensionHandler;
 use Groundwork\Response\Response;
 use Groundwork\Response\View;
+use Groundwork\Router\MatchedRoute;
 use Groundwork\Router\Router;
 use Groundwork\Traits\Singleton;
 use Groundwork\Twig\Engine;
@@ -99,30 +100,29 @@ class Server {
     public function handle() : void
     {
         try {
+            /** @var MatchedRoute $match */
             $match = instance('router')->matchRoutes();
 
             $result = $match->call();
-        }
-        catch (HttpException $ex) {
+        } catch (HttpException $ex) {
             $result = $ex;
             error_log((string) $ex);
-        }
-        catch (ValidationFailedException $ex) {
+        } catch (ValidationFailedException $ex) {
             // This is thrown if the dependency injection ran a Validator which returned on failure
             $result = back();
-        }
-        catch (Exception $ex) {
+        } catch (Exception $ex) {
             if (Config::isDev()) {
                 throw $ex;
             }
             $result = new InternalServerErrorException($ex->getMessage());
+
             error_log((string) $ex);
-        } 
-        catch (Error $ex) {
+        } catch (Error $ex) {
             if (Config::isDev()) {
                 throw $ex;
             }
             $result = new InternalServerErrorException($ex->getMessage());
+
             error_log((string) $ex);
         }
 
@@ -146,41 +146,38 @@ class Server {
                 // Parse the View and re-run this method with the content as a response
                 $engine = instance('twig');
 
-                $this->processResult(
-                    response($engine->render($result)),
-                    $code
-                );
-                break;
-            case $result instanceof Response:
-                // Submit the result with the use of the Response Class
-                if (!is_null($code)) {
-                    $result->code($code);
-                }
-
-                $result
-                    ->get()
-                    ->prepare(request()->getRequest())
-                    ->send();
-
+                $result = response($engine->render($result));
                 break;
             case $result instanceof PaginatedResult:
                 // create a json response
-                $this->processResult(jsonResponse($result), $code);
-
+                $result = jsonResponse($result);
                 break;
             case $result instanceof HttpException:
                 // Prepare the View for this exception if the error handler didn't catch it.
-                $this->processResult($result->toView(), $code ?? $result->getCode() ?? 500);
-
+                $code = $code ?? $result->getCode() ?? 500;
+                $result = $result->toView();
                 break;
             case is_string($result):
                 // Simply return it as a string response.
-                $this->processResult(response($result), $code);
-
+                $result = response($result);
                 break;
-            default:
-                echo $result;
         }
+
+        if ($result instanceof Response) {
+
+            // Submit the result with the use of the Response Class
+            if (! is_null($code)) {
+                $result->code($code);
+            }
+
+            $result
+                ->get()
+                ->prepare(request()->getRequest())
+                ->send();
+        } else {
+            echo $result;
+        }
+
     }
 
     /**

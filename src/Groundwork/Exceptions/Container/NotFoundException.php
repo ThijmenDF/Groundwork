@@ -1,6 +1,6 @@
 <?php
 
-namespace Groundwork\Container;
+namespace Groundwork\Exceptions\Container;
 
 use Psr\Container\NotFoundExceptionInterface;
 

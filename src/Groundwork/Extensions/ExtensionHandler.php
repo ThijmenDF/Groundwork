@@ -22,7 +22,7 @@ abstract class ExtensionHandler
             $injector = new Injector($className);
 
             /** @var Extension $extension */
-            $extension = $injector->provide();
+            $extension = $injector->construct();
 
             $extension->build($object);
         }

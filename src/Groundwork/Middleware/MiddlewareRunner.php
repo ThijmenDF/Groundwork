@@ -41,14 +41,13 @@ class MiddlewareRunner
         $injector = new Injector($name);
 
         /** @var MiddlewareHandler $middleware */
-        $middleware = $injector->provide();
+        $middleware = $injector->construct();
 
-        // The 'next' function simply calls the next middleware in the stack. If the last middleware is reached, it runs the desired class and method instead.
-        $next = function(Request $request) use ($handler) {
+        // Then call the middleware. Provide it with a 'next' function which it may call to trigger the next middleware.
+        // The 'next' function simply calls the next middleware in the stack. If the last middleware is reached, it runs
+        // the desired class and method instead.
+        return $middleware->handle($request, function(Request $request) use ($handler) {
             return $this->call($request, $handler);
-        };
-
-        // Then call the middleware. Provide it with a 'next' method which it may call to trigger the next middleware.
-        return $middleware->handle($request, $next);
+        });
     }
 }

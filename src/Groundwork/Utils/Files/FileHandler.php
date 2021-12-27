@@ -9,6 +9,8 @@ abstract class FileHandler
 {
 
     /**
+     * Scans a given directory for files and other directories. Applies an optional text-based filter as well.
+     *
      * @param string      $directory
      * @param string|null $filter
      *
@@ -23,8 +25,9 @@ abstract class FileHandler
             if (in_array($file, ['.', '..'], true)) {
                 continue;
             }
-            if (!is_null($filter)) {
-                if (!Str::contains($file, $filter)) {
+
+            if (! is_null($filter)) {
+                if (! Str::contains($file, $filter)) {
                     continue;
                 }
             }
@@ -38,6 +41,8 @@ abstract class FileHandler
     }
 
     /**
+     * Returns whether the given directory or file exists.
+     *
      * @param string $path
      *
      * @return bool

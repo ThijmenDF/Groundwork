@@ -36,22 +36,34 @@ class Injector
     }
 
     /**
-     * Calls the method with the parameters it requested. Parameters are filled through the $params param, or from the
-     * __inject method if no parameter with such name exists.
+     * Creates a new instance of the class. Returns the instance if successful.
      *
-     * @param string|null $method The method to call
-     * @param array       $params The params to give the method. These may get overwritten through dependency injection.
+     * @param array $params
      *
      * @return mixed
      */
-    public function provide(?string $method = null, array $params = [])
+    public function construct(array $params = [])
     {
-        if (is_null($method)) {
-            return new $this->class(
+        if (gettype($this->class) === 'string') {
+            return $this->class = new $this->class(
                 ...$this->inject($this->reflection->getConstructor(), $params)
             );
         }
-        
+
+        return $this->class;
+    }
+
+    /**
+     * Calls the method with the parameters it requested. Parameters are filled through the $params param, or from the
+     * __inject method if no parameter with such name exists.
+     *
+     * @param string $method The method to call.
+     * @param array  $params The params to give the method. These may get overwritten through dependency injection.
+     *
+     * @return mixed
+     */
+    public function provide(string $method, array $params = [])
+    {
         if (method_exists($this->class, $method)) {
             try {
                 return call_user_func_array(
