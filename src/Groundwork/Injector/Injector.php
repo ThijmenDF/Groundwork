@@ -3,12 +3,13 @@
 namespace Groundwork\Injector;
 
 use BadMethodCallException;
-use Groundwork\Exceptions\ValidationFailedException;
+use Groundwork\Server;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionParameter;
+use ReflectionUnionType;
 
 class Injector
 {
@@ -100,7 +101,7 @@ class Injector
         $returned = table();
 
         table($method->getParameters())
-            ->each(function (ReflectionParameter $definition) use($params, $returned) {
+            ->each(function (ReflectionParameter $definition) use ($params, $returned) {
                 $key = $definition->getName();
 
                 $returned->set($key, $this->handleProvisioning($definition, $params->get($key)));
@@ -138,6 +139,13 @@ class Injector
             if ($class->implementsInterface(Injection::class)) {
                 // if the class implements the Injection interface, call that.
                 return call_user_func($name . '::__inject', $value);
+            }
+
+            // Check if there's an container instance with the proper class.
+            $container = Server::getInstance()->getContainer();
+
+            if ($container->hasClass($class->name)) {
+                return $container->getClass($class->name);
             }
         } catch (ReflectionException $ex) {
             // do nothing...

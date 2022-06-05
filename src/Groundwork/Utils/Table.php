@@ -121,7 +121,7 @@ class Table implements IteratorAggregate, Countable, ArrayAccess, JsonSerializab
          * @param string|int $offset
          * @param mixed      $value
          */
-        public function offsetSet($offset, $value)
+        public function offsetSet($offset, $value) : void
         {
             $this->__set($offset, $value);
         }
@@ -133,7 +133,7 @@ class Table implements IteratorAggregate, Countable, ArrayAccess, JsonSerializab
          * 
          * @param string|int $offset
          */
-        public function offsetUnset($offset)
+        public function offsetUnset($offset) : void
         {
             unset($this->values[$offset]);
         }
