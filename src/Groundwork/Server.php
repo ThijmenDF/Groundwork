@@ -156,38 +156,36 @@ class Server {
                 // Parse the View and re-run this method with the content as a response
                 $engine = instance('twig');
 
-                $result = response($engine->render($result));
+                $this->processResult(response($engine->render($result)));
                 break;
             case $result instanceof PaginatedResult:
                 // create a json response
-                $result = jsonResponse($result);
+                $this->processResult(jsonResponse($result));
                 break;
             case $result instanceof HttpException:
                 // Prepare the View for this exception if the error handler didn't catch it.
                 $code = $code ?? $result->getCode() ?? 500;
-                $result = $result->toView();
+
+                $this->processResult($result->toView(), $code);
                 break;
             case is_string($result):
                 // Simply return it as a string response.
-                $result = response($result);
+                $this->processResult(response($result));
                 break;
+            case $result instanceof Response:
+                // Submit the result with the use of the Response Class
+                if (! is_null($code)) {
+                    $result->code($code);
+                }
+
+                $result
+                    ->get()
+                    ->prepare(request()->getRequest())
+                    ->send();
+                break;
+            default:
+                echo $result;
         }
-
-        if ($result instanceof Response) {
-
-            // Submit the result with the use of the Response Class
-            if (! is_null($code)) {
-                $result->code($code);
-            }
-
-            $result
-                ->get()
-                ->prepare(request()->getRequest())
-                ->send();
-        } else {
-            echo $result;
-        }
-
     }
 
     /**
