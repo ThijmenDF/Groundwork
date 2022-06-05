@@ -93,6 +93,16 @@ class Server {
     }
 
     /**
+     * Returns the container parent instance.
+     * 
+     * @return Container
+     */
+    public function getContainer(): Container
+    {
+        return $this->container;
+    }
+
+    /**
      * Runs the route matching and runs the controller method
      *
      * @throws Exception

@@ -11,5 +11,5 @@ interface Injection
      *
      * @return static
      */
-    public static function __inject($param) : self;
+    public static function __inject($param): self;
 }

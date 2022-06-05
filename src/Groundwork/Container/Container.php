@@ -45,7 +45,7 @@ class Container implements ContainerInterface
 
         $instance = $this->instances->get($id);
 
-        if (gettype($instance) === 'object') {
+        if (gettype($instance) !== 'string') {
             // Return the instance, as it's already a class.
             return $instance;
         }
@@ -69,5 +69,38 @@ class Container implements ContainerInterface
     public function has(string $id) : bool
     {
         return $this->instances->has($id);
+    }
+
+    /**
+     * Returns whether a class has been registered with the given class namespace.
+     * 
+     * @param string $namespace
+     * 
+     * @return bool
+     */
+    public function hasClass(string $namespace) : bool
+    {
+        return $this->instances->contains(function ($item) use ($namespace) {
+            return $item === $namespace || $item instanceof $namespace;
+        });
+    }
+
+    /**
+     * Returns an instance by its class namespace.
+     * 
+     * @param string $namespace
+     * 
+     * @return object|null
+     */
+    public function getClass(string $namespace)
+    {
+        /** @var string $name */
+        foreach ($this->instances as $name => $instance) {
+            if ($instance === $namespace || $instance instanceof $namespace) {
+                return $this->get($name);
+            }
+        }
+        
+        return null;
     }
 }

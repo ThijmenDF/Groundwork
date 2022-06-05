@@ -305,7 +305,7 @@ class Migrator {
         // get the class from this file
         $parts = explode('_', $file);
 
-        $class = Str::studly(implode("_", array_slice($parts, 2)));
+        $class = Str::studly(implode("_", array_slice($parts, 1)));
 
         require_once root() . $this::migrationFolder . '/' . $file . '.php';
 

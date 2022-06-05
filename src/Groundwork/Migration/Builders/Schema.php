@@ -107,6 +107,22 @@ class Schema implements Builder {
     }
 
     /**
+     * Disables foreign key checks for the current session.
+     */
+    public static function disableForeignKeys()
+    {
+        return instance('db')->raw("SET FOREIGN_KEY_CHECKS = 0");
+    }
+
+    /**
+     * (re-)Enables foreign key checks for the current session.
+     */
+    public static function enableForeignKeys()
+    {
+        return instance('db')->raw("SET FOREIGN_KEY_CHECKS = 1");
+    }
+
+    /**
      * Builds a list of queries to execute.
      *
      * @return Table
